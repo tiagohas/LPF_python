@@ -1,62 +1,61 @@
- https://stackoverflow.com/questions/25191620/
-#   creating-lowpass-filter-in-scipy-understanding-methods-and-units
+'''
+Created on 10 de nov de 2017
 
+@author: pyetr_a1q8rre
+'''
+import pyaudio
+import wave
+import struct
+import matplotlib.pyplot as plt
 import numpy as np
-from scipy.signal import butter, lfilter, freqz
-from matplotlib import pyplot as plt
 
+# define stream chunk
+chunk = 20 * 4096
 
-def butter_lowpass(cutoff, fs, order=5):
-    nyq = 0.5 * fs
-    normal_cutoff = cutoff / nyq
-    b, a = butter(order, normal_cutoff, btype='low', analog=False)
-    return b, a
+# open a wav format music
+f = wave.open("Daft_Punk_Get_Lucky.wav", "rb")
+# instantiate PyAudio
+p = pyaudio.PyAudio()
+formato = p.get_format_from_width(f.getsampwidth())
+frame_rate = f.getframerate()
 
+print('formato ', formato, 'width ', f.getsampwidth(), 'channels ', f.getnchannels())
 
-def butter_lowpass_filter(data, cutoff, fs, order=5):
-    b, a = butter_lowpass(cutoff, fs, order=order)
-    y = lfilter(b, a, data)
-    return y
+# open stream
+stream = p.open(format=formato,
+                channels=f.getnchannels(),
+                rate=frame_rate,
+                output=True)
+# read data
+f.readframes(chunk)
+data = f.readframes(chunk)
 
+size = 2 * chunk - 1
+fmt = str(size) + 'HH'
 
-# Filter requirements.
-order = 6
-fs = 30.0       # sample rate, Hz
-cutoff = 3.667  # desired cutoff frequency of the filter, Hz
+print('len(data)', len(data), "calcsize ", struct.calcsize(fmt))
 
-# Get the filter coefficients so we can check its frequency response.
-b, a = butter_lowpass(cutoff, fs, order)
+data_ = np.reshape(np.fromstring(data, 'Int16'), [chunk, 2])
+x = np.arange(len(data_[:, 0]))
 
-# Plot the frequency response.
-w, h = freqz(b, a, worN=8000)
-plt.subplot(2, 1, 1)
-plt.plot(0.5*fs*w/np.pi, np.abs(h), 'b')
-plt.plot(cutoff, 0.5*np.sqrt(2), 'ko')
-plt.axvline(cutoff, color='k')
-plt.xlim(0, 0.5*fs)
-plt.title("Lowpass Filter Frequency Response")
-plt.xlabel('Frequency [Hz]')
-plt.grid()
+plt.ion()
 
+# play stream
+while data:
+    data_ = np.reshape(np.fromstring(data, 'Int16'), [chunk, 2])
 
-# Demonstrate the use of the filter.
-# First make some data to be filtered.
-T = 5.0             # seconds
-n = int(T * fs)     # total number of samples
-t = np.linspace(0, T, n, endpoint=False)
-# "Noisy" data.  We want to recover the 1.2 Hz signal from this.
-data = np.sin(1.2*2*np.pi*t) + 1.5*np.cos(9*2*np.pi*t) \
-        + 0.5*np.sin(12.0*2*np.pi*t)
+    plt.plot(data_[:, 0])
 
-# Filter the data, and plot both the original and filtered signals.
-y = butter_lowpass_filter(data, cutoff, fs, order)
+    plt.ylim((-40000, 40000))
+    plt.draw()
+    plt.pause(0.0000001)
+    plt.gcf().clear()
 
-plt.subplot(2, 1, 2)
-plt.plot(t, data, 'b-', label='data')
-plt.plot(t, y, 'g-', linewidth=2, label='filtered data')
-plt.xlabel('Time [sec]')
-plt.grid()
-plt.legend()
+    stream.write(data)
+    data = f.readframes(chunk)
 
-plt.subplots_adjust(hspace=0.35)
-plt.show()
+# stop stream
+stream.stop_stream()
+stream.close()
+
+# close PyAudio
