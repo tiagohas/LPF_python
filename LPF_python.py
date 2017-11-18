@@ -1,7 +1,7 @@
 '''
 Created on 10 de nov de 2017
 
-@author: pyetr_a1q8rre
+@author: tiagohas
 '''
 import struct
 import wave
