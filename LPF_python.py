@@ -3,11 +3,13 @@ Created on 10 de nov de 2017
 
 @author: pyetr_a1q8rre
 '''
-import pyaudio
-import wave
 import struct
+import wave
+
 import matplotlib.pyplot as plt
 import numpy as np
+import pyaudio
+from scipy.signal import butter, lfilter
 
 # define stream chunk
 chunk = 20 * 4096
@@ -39,6 +41,24 @@ data_ = np.reshape(np.fromstring(data, 'Int16'), [chunk, 2])
 x = np.arange(len(data_[:, 0]))
 
 plt.ion()
+
+
+#   SELF CODE START
+
+def butter_lowpass(chunk, fs, order=6):
+    nyq = 0.5 * fs
+    normal_chunk = chunk / nyq
+    b, a = butter(order, normal_chunk, btype='low', analog=False)
+    return b, a
+
+def butter_lowpass_filter(data, chunk, fs, order=6):
+    b, a = butter_lowpass(chunk, fs, order=order)
+    y = lfilter(b, a, data)
+    return y
+
+
+#   SELF CODE FINISH
+
 
 # play stream
 while data:
