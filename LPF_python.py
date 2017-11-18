@@ -5,17 +5,17 @@ Created on 10 de nov de 2017
 '''
 import struct
 import wave
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pyaudio
-from scipy.signal import butter, lfilter
+import scipy
 
 # define stream chunk
 chunk = 20 * 4096
 
 # open a wav format music
 f = wave.open("Daft_Punk_Get_Lucky.wav", "rb")
+
 # instantiate PyAudio
 p = pyaudio.PyAudio()
 formato = p.get_format_from_width(f.getsampwidth())
@@ -28,6 +28,7 @@ stream = p.open(format=formato,
                 channels=f.getnchannels(),
                 rate=frame_rate,
                 output=True)
+
 # read data
 f.readframes(chunk)
 data = f.readframes(chunk)
@@ -43,21 +44,25 @@ x = np.arange(len(data_[:, 0]))
 plt.ion()
 
 
-#   SELF CODE START
+# @tiagohas CODE START
 
-def butter_lowpass(chunk, fs, order=6):
-    nyq = 0.5 * fs
-    normal_chunk = chunk / nyq
-    b, a = butter(order, normal_chunk, btype='low', analog=False)
+cutoff = 50       # cutoff frequency in rad/s
+fs = frame_rate     # imported frame rate
+order = 32          # filter order
+
+def butter_filter(cutoff, frame_rate, order=5):
+    nyq = frame_rate / 2
+    normal_cutoff = cutoff / nyq
+    b, a = scipy.signal.butter(order, normal_cutoff, btype='low', analog=False)
     return b, a
 
-def butter_lowpass_filter(data, chunk, fs, order=6):
-    b, a = butter_lowpass(chunk, fs, order=order)
-    y = lfilter(b, a, data)
+def butter_lowpass_filter(data_, cutoff, frame_rate, order=5):
+    b, a = butter_filter(cutoff, frame_rate, order=order)
+    y = scipy.signal.lfilter(b, a, data_)
     return y
 
 
-#   SELF CODE FINISH
+# @tiagohas CODE FINISH
 
 
 # play stream
