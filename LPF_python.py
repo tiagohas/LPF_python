@@ -46,9 +46,6 @@ plt.ion()
 
 # START
 
-cutoff = 50       # cutoff frequency in rad/s
-fs = frame_rate     # imported frame rate
-order = 32          # filter order
 
 def butter_filter(cutoff, frame_rate, order=5):
     nyq = frame_rate / 2
@@ -60,6 +57,13 @@ def butter_lowpass_filter(data_, cutoff, frame_rate, order=5):
     b, a = butter_filter(cutoff, frame_rate, order=order)
     y = scipy.signal.lfilter(b, a, data_)
     return y
+
+cutoff = 3.667       # cutoff frequency in rad/s
+fs = 30.0     # imported frame rate
+order = 6          # filter order
+
+b, a = butter_filter(cutoff, fs, order)     # get the filter coefficients
+
 
 
 # FINISH
