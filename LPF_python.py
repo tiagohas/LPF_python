@@ -44,7 +44,7 @@ x = np.arange(len(data_[:, 0]))
 plt.ion()
 
 
-# @tiagohas CODE START
+# START
 
 cutoff = 50       # cutoff frequency in rad/s
 fs = frame_rate     # imported frame rate
@@ -62,7 +62,7 @@ def butter_lowpass_filter(data_, cutoff, frame_rate, order=5):
     return y
 
 
-# @tiagohas CODE FINISH
+# FINISH
 
 # play stream
 while data:
