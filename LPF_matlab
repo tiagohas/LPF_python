@@ -1,0 +1,59 @@
+#	MATLAB CODE
+
+clc
+clear all
+
+
+#	DECLARA CHUNK
+Fs=200e3;		#20kHz
+Ts=1/Fs;
+dt=0:Ts:5e-3-Ts;
+
+
+#	DECLARA FREQUENCIAS (no caso vai ser a musica)
+f1=1e3;
+f2=20e3;
+f3=30e3;
+
+
+#DECLARA DOMINIO DA FREQUENCIA PRA PODER PLOTAR
+y=5.sin(2*pi*f1*dt)+5*sin(2*pi*f2*dt)+10*sin(2*pi*f3*dt);
+
+
+#SINAL COM RUIDO PLOTADO
+plot(dt,y)
+
+
+#CALCULA TRANSFORMADA DE FOURIER
+nfft=length(y);
+nfft2=2.^nextpow2(nfft);
+
+
+#CALCULA MAGNITUDE DA FREQUENCIA NO EIXO Y
+fy=fft(y,nfft2);
+fy=fy(1:nfft2/2);
+
+
+#CALCULA EIXO X NO DOMINIO DA FREQUENCIA
+xfft=Fs.*(0:nfft2/2-1)/nfft2;
+
+
+#PLOTA OS PICOS DE FREQUENCIA, IGUAL PROJETO ANTERIOR, AJUDA A ENCONTRAR FREQUENCIA
+plot (xfft,abs(fy/max(fy)));
+
+
+#DECLARA FAIXA DE FREQUENCIA A SER USADA(CUT_OFF)
+cut_off=1.5e3/(Fs/2);		#1,5kHz
+order=32;
+
+
+#DECLARA FUNÇÃO FILTRO NO MATLAB, TEM UMA TAL DE 'SCIPY.SIGNAL.LFILTER' NO PYTHON QUE É EQUIVALENTE
+h=fir1(order,cut_off);
+
+
+#CONVOLUÇÃO ENTRE DOMINIO 'y' COM O FILTRO 'h'
+con=conv(y,h);
+
+
+#VRAU
+plot(con);
