@@ -8,7 +8,7 @@ import wave
 import matplotlib.pyplot as plt
 import numpy as np
 import pyaudio
-import scipy
+from scipy.signal import butter ,lfilter
 
 # define stream chunk
 chunk = 20 * 4096
@@ -53,12 +53,12 @@ order = 32          # filter order
 def butter_filter(cutoff, frame_rate, order=5):
     nyq = frame_rate / 2
     normal_cutoff = cutoff / nyq
-    b, a = scipy.signal.butter(order, normal_cutoff, btype='low', analog=False)
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
     return b, a
 
 def butter_lowpass_filter(data_, cutoff, frame_rate, order=5):
     b, a = butter_filter(cutoff, frame_rate, order=order)
-    y = scipy.signal.lfilter(b, a, data_)
+    y = lfilter(b, a, data_)
     return y
 
 
