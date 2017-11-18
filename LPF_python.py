@@ -64,7 +64,6 @@ def butter_lowpass_filter(data_, cutoff, frame_rate, order=5):
 
 # @tiagohas CODE FINISH
 
-
 # play stream
 while data:
     data_ = np.reshape(np.fromstring(data, 'Int16'), [chunk, 2])
